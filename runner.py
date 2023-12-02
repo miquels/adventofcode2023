@@ -1,5 +1,7 @@
 
 import argparse, importlib, os, re
+from typing import Any, Callable
+from baseday import BaseDay
 
 # Parse arguments
 parser = argparse.ArgumentParser(
@@ -16,7 +18,8 @@ parser.add_argument('--input',
 args = parser.parse_args()
 
 # Load modules.
-days = []
+days: list[Callable[[Any, Any], BaseDay]] = []
+
 for entry in sorted(os.listdir('.')):
     match = re.match(r"^(day(\d\d))-", entry)
     if match is not None:
