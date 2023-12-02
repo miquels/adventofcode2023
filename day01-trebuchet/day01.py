@@ -25,7 +25,3 @@ class Day01(BaseDay):
                 last = digitmap[re.search(f"^.*({digits})", line).group(1)]
                 total += first * 10 + last
         print("day1 part2: ", total)
-
-if __name__ == "__main__":
-    day = Day01(sys.argv[1])
-    day.run()

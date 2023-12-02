@@ -1,8 +1,32 @@
 
-import day01, day02
+import argparse, importlib, os, re
 
-days = [ day01.Day01, day02.Day02 ]
+# Parse arguments
+parser = argparse.ArgumentParser(
+                    prog='runner',
+                    description='runs the puzzles')
+parser.add_argument('--day', type=int, nargs='+',
+                    help='the day to run')
+parser.add_argument('--part', type=int,
+                    help='the part to run')
+parser.add_argument('--example', action='store_true',
+                    help='use example input')
+parser.add_argument('--input',
+                    help='input file to use')
+args = parser.parse_args()
 
+# Load modules.
+days = []
+for entry in sorted(os.listdir('.')):
+    match = re.match(r"^(day(\d\d))-", entry)
+    if match is not None:
+        name = match.group(1)
+        day = int(match.group(2))
+        if args.day is None or day in args.day:
+            mod = importlib.import_module(entry + '.' + name)
+            days.append(getattr(mod, name.capitalize()))
+
+# Run modules.
 for day in days:
-    instance = day()
-    instance.run()
+    instance = day(args.input, args.example)
+    instance.run(args.part)

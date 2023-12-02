@@ -51,7 +51,3 @@ class Day02(BaseDay):
                 game = Game(line)
                 total += game.power()
         print('day02 part2:', total)
-
-if __name__ == "__main__":
-    day = Day02(sys.argv[1])
-    day.run()
