@@ -35,8 +35,6 @@ class Game():
         return f"Game {self.number}: {self.grabs}"
 
 class Day02(BaseDay):
-    input: str = 'day02-input.txt'
-
     def part1(self):
         total = 0
         with open(self.input) as f:
