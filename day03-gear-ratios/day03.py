@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-import itertools
 import re
 
 from baseday import BaseDay
@@ -23,61 +22,43 @@ class Game:
     def __init__(self, input):
         self.numbers  = []
         self.symbols  = []
-        y = 0
         with open(input) as f:
-            for line in f:
+            for (y, line) in enumerate(f):
                 (nums, syms) = self.parse(line.strip(), y)
                 self.numbers.append(nums)
                 self.symbols.extend(syms)
-                y += 1
 
     def parse(self, line: str, y: int) -> tuple[list[Number], list[Symbol]]:
-        nums: list[Number] = []
-        syms: list[Symbol] = []
         n = re.finditer(r"([0-9]+)", line)
-        if n is not None:
-            nums.extend(map(lambda x: Number(int(x.group(1)), x.span(), y), n))
         s = re.finditer(r"([^0-9.])", line)
-        if s is not None:
-            syms.extend(map(lambda x: Symbol(x.group(1), x.span()[0], y), s))
+        nums = list(map(lambda x: Number(int(x.group(1)), x.span(), y), n))
+        syms = list(map(lambda x: Symbol(x.group(1), x.span()[0], y), s))
         return (nums, syms)
 
-    def overlap_y(self, symbol: Symbol, offset: int, remove: bool) -> list[Number]:
-        rnums = []
-        numbers = self.numbers[symbol.y + offset]
-        i = 0
-        while i < len(numbers):
-            n = numbers[i]
-            if symbol.x >= n.x[0] - 1 and symbol.x <= n.x[1]:
-                if remove:
-                    rnums.append(numbers.pop(i))
-                else:
-                    rnums.append(numbers[i])
-                    i += 1
-            else:
-                i += 1
-        return rnums
+    def overlap_y(self, symbol: Symbol, offset: int) -> list[Number]:
+        if symbol.y + offset < 0 or symbol.y + offset >= len(self.numbers):
+            return []
+        predicate = lambda n: symbol.x >= n.x[0] - 1 and symbol.x <= n.x[1]
+        return list(filter(predicate, self.numbers[symbol.y + offset]))
 
-    def overlap(self, symbol: Symbol, remove: bool = False)-> list[Number]:
+    def overlap(self, symbol: Symbol)-> list[Number]:
         rnums = []
-        if symbol.y > 0:
-            rnums.extend(self.overlap_y(symbol, -1, remove))
-        rnums.extend(self.overlap_y(symbol, 0, remove))
-        if symbol.y < len(self.numbers) - 1:
-            rnums.extend(self.overlap_y(symbol, 1, remove))
+        rnums.extend(self.overlap_y(symbol, -1))
+        rnums.extend(self.overlap_y(symbol, 0))
+        rnums.extend(self.overlap_y(symbol, 1))
         return rnums
 
     def part_numbers(self) -> list[Number]:
         rnums = []
         for symbol in self.symbols:
-            rnums.extend(self.overlap(symbol, True))
+            rnums.extend(self.overlap(symbol))
         return rnums
 
     def gear_parts(self) -> list[tuple[Number, Number]]:
         rnums = []
         stars = filter(lambda x: x.value == '*', self.symbols)
         for symbol in stars:
-            nums = self.overlap(symbol, False)
+            nums = self.overlap(symbol)
             if len(nums) == 2:
                 rnums.append((nums[0], nums[1]))
         return rnums
