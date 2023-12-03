@@ -18,7 +18,7 @@ class Symbol:
 
 class Game:
     numbers: list[list[Number]]
-    symbols: list[list[Symbol]]
+    symbols: list[Symbol]
 
     def __init__(self, input):
         self.numbers  = []
@@ -28,7 +28,7 @@ class Game:
             for line in f:
                 (nums, syms) = self.parse(line.strip(), y)
                 self.numbers.append(nums)
-                self.symbols.append(syms)
+                self.symbols.extend(syms)
                 y += 1
 
     def parse(self, line: str, y: int) -> tuple[list[Number], list[Symbol]]:
@@ -42,31 +42,44 @@ class Game:
             syms.extend(map(lambda x: Symbol(x.group(1), x.span()[0], y), s))
         return (nums, syms)
 
-    def overlap_y(self, symbol: Symbol, offset: int) -> list[Number]:
+    def overlap_y(self, symbol: Symbol, offset: int, remove: bool) -> list[Number]:
         rnums = []
         numbers = self.numbers[symbol.y + offset]
         i = 0
         while i < len(numbers):
             n = numbers[i]
             if symbol.x >= n.x[0] - 1 and symbol.x <= n.x[1]:
-                rnums.append(numbers.pop(i))
+                if remove:
+                    rnums.append(numbers.pop(i))
+                else:
+                    rnums.append(numbers[i])
+                    i += 1
             else:
                 i += 1
         return rnums
 
-    def overlap(self, symbol: Symbol)-> list[Number]:
+    def overlap(self, symbol: Symbol, remove: bool = False)-> list[Number]:
         rnums = []
         if symbol.y > 0:
-            rnums.extend(self.overlap_y(symbol, -1))
-        rnums.extend(self.overlap_y(symbol, 0))
+            rnums.extend(self.overlap_y(symbol, -1, remove))
+        rnums.extend(self.overlap_y(symbol, 0, remove))
         if symbol.y < len(self.numbers) - 1:
-            rnums.extend(self.overlap_y(symbol, 1))
+            rnums.extend(self.overlap_y(symbol, 1, remove))
         return rnums
 
     def part_numbers(self) -> list[Number]:
         rnums = []
-        for symbol in itertools.chain.from_iterable(self.symbols):
-            rnums.extend(self.overlap(symbol))
+        for symbol in self.symbols:
+            rnums.extend(self.overlap(symbol, True))
+        return rnums
+
+    def gear_parts(self) -> list[tuple[Number, Number]]:
+        rnums = []
+        stars = filter(lambda x: x.value == '*', self.symbols)
+        for symbol in stars:
+            nums = self.overlap(symbol, False)
+            if len(nums) == 2:
+                rnums.append((nums[0], nums[1]))
         return rnums
 
 class Day03(BaseDay):
@@ -76,4 +89,6 @@ class Day03(BaseDay):
         print('day03 part1:', sum(map(lambda x: x.value, parts)))
 
     def part2(self):
-        print('day03 part2: TBD')
+        game = Game(self.input)
+        parts = game.gear_parts()
+        print('day03 part2:', sum(map(lambda x: x[0].value * x[1].value, parts)))
