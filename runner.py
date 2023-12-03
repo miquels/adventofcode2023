@@ -24,8 +24,8 @@ for entry in sorted(os.listdir('.')):
     match = re.match(r"^(day(\d\d))-", entry)
     if match is not None:
         name = match.group(1)
-        day = int(match.group(2))
-        if args.day is None or day in args.day:
+        dayno = int(match.group(2))
+        if args.day is None or dayno in args.day:
             mod = importlib.import_module(entry + '.' + name)
             days.append(getattr(mod, name.capitalize()))
 

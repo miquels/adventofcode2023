@@ -31,11 +31,11 @@ class Game():
         b = max([grab.get('blue', 0) for grab in self.grabs])
         return r * g * b
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Game {self.number}: {self.grabs}"
 
 class Day02(BaseDay):
-    def part1(self):
+    def part1(self) -> None:
         total = 0
         with open(self.input) as f:
             for line in f:
@@ -44,7 +44,7 @@ class Day02(BaseDay):
                     total += game.number
         print('day02 part1:', total)
 
-    def part2(self):
+    def part2(self) -> None:
         total = 0
         with open(self.input) as f:
             for line in f:

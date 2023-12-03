@@ -19,7 +19,7 @@ class Game:
     numbers: list[list[Number]]
     symbols: list[Symbol]
 
-    def __init__(self, input):
+    def __init__(self, input: str) -> None:
         self.numbers  = []
         self.symbols  = []
         with open(input) as f:
@@ -64,12 +64,12 @@ class Game:
         return rnums
 
 class Day03(BaseDay):
-    def part1(self):
+    def part1(self) -> None:
         game = Game(self.input)
         parts = game.part_numbers()
         print('day03 part1:', sum(map(lambda x: x.value, parts)))
 
-    def part2(self):
+    def part2(self) -> None:
         game = Game(self.input)
         parts = game.gear_parts()
         print('day03 part2:', sum(map(lambda x: x[0].value * x[1].value, parts)))
