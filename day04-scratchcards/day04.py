@@ -21,21 +21,18 @@ class Card:
         w, h = line.split(' | ')
         return cls(set(map(int, w.split())), list(map(int, h.split())), 1)
 
-class Game:
+class Day04(BaseDay):
     cards: list[Card]
 
-    def __init__(self, input: str) -> None:
-        with open(input) as f:
+    def init(self) -> None:
+        with open(self.input) as f:
             self.cards = [Card.parse(line) for line in f]
 
-class Day04(BaseDay):
     def part1(self) -> None:
-        game = Game(self.input)
-        print('day04 part1', sum([card.worth() for card in game.cards]))
+        print('day04 part1', sum([card.worth() for card in self.cards]))
 
     def part2(self) -> None:
-        game = Game(self.input)
-        for (c, card) in enumerate(game.cards):
-            for i in range(c + 1, min(c + 1 + card.matches(), len(game.cards))):
-                game.cards[i].instances += card.instances
-        print('day04 part2:', sum([card.instances for card in game.cards]))
+        for (i, card) in enumerate(self.cards):
+            for c in self.cards[i + 1: i + 1 + card.matches()]:
+                c.instances += card.instances
+        print('day04 part2:', sum([card.instances for card in self.cards]))

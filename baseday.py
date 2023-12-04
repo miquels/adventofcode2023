@@ -17,7 +17,11 @@ class BaseDay():
     def part2(self) -> None:
         raise NotImplementedError()
 
+    def init(self) -> None:
+        pass
+
     def run(self, part: int | None = None) -> None:
+        self.init()
         if part is None or part == 1:
             self.part1()
         if part is None or part == 2:
