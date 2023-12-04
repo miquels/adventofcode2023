@@ -5,17 +5,21 @@ from typing import Self
 @dataclass
 class Card:
     winning: set[int]
-    hand: list[int]
+    have: list[int]
+    instances: int
+
+    def matches(self) -> int:
+        return sum([number in self.winning for number in self.have])
 
     def worth(self) -> int:
-        matches = sum([number in self.winning for number in self.hand])
+        matches = self.matches()
         return int(pow(2, matches - 1)) if matches > 0 else 0
 
     @classmethod
     def parse(cls, line: str) -> Self:
-        [_, line] = line.split(': ')
-        [w, h] = line.split(' | ')
-        return cls(set(map(int, w.split())), list(map(int, h.split())))
+        _, line = line.split(': ')
+        w, h = line.split(' | ')
+        return cls(set(map(int, w.split())), list(map(int, h.split())), 1)
 
 class Game:
     cards: list[Card]
@@ -30,4 +34,8 @@ class Day04(BaseDay):
         print('day04 part1', sum([card.worth() for card in game.cards]))
 
     def part2(self) -> None:
-        print('day04 part2: TBD')
+        game = Game(self.input)
+        for (c, card) in enumerate(game.cards):
+            for i in range(c + 1, min(c + 1 + card.matches(), len(game.cards))):
+                game.cards[i].instances += card.instances
+        print('day04 part2:', sum([card.instances for card in game.cards]))
