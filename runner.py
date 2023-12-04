@@ -30,6 +30,6 @@ for entry in sorted(os.listdir('.')):
             days.append(getattr(mod, name.capitalize()))
 
 # Run modules.
-for day in days:
+for i, day in enumerate(days):
     instance = day(args.input, args.example)
-    instance.run(args.part)
+    instance.run(i + 1, args.part)

@@ -9,7 +9,7 @@ class Day01(BaseDay):
             for line in f:
                 digits = [c for c in line if c.isdigit()]
                 total += int(digits[0] + digits[-1])
-        print("day1 part1: ", total)
+        print("day01 part1: ", total)
 
     def part2(self) -> None:
         digitmap = {
@@ -24,7 +24,7 @@ class Day01(BaseDay):
                 first = digitmap[unwrap(re.search(f"^.*?({digits}).*", line)).group(1)]
                 last = digitmap[unwrap(re.search(f"^.*({digits})", line)).group(1)]
                 total += first * 10 + last
-        print("day1 part2: ", total)
+        print("day01 part2: ", total)
 
 # Helper so that mypy doesn't complain, inspired by Rust unwrap().
 from typing import TypeVar
