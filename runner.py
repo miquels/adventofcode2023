@@ -1,4 +1,4 @@
-#! /usr/bin/env python3.12
+#! /usr/bin/env python3
 
 import argparse, importlib, os, re
 from typing import Any, Callable
@@ -19,7 +19,7 @@ parser.add_argument('--input',
 args = parser.parse_args()
 
 # Load modules.
-days: list[Callable[[Any, Any], BaseDay]] = []
+days: list[tuple[int, Callable[[Any, Any], BaseDay]]] = []
 
 for entry in sorted(os.listdir('.')):
     match = re.match(r"^(day(\d\d))-", entry)
@@ -28,9 +28,9 @@ for entry in sorted(os.listdir('.')):
         dayno = int(match.group(2))
         if args.day is None or dayno in args.day:
             mod = importlib.import_module(entry + '.' + name)
-            days.append(getattr(mod, name.capitalize()))
+            days.append((dayno, getattr(mod, name.capitalize())))
 
 # Run modules.
-for i, day in enumerate(days):
+for i, day in days:
     instance = day(args.input, args.example)
-    instance.run(i + 1, args.part)
+    instance.run(i, args.part)

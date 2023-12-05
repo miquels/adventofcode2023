@@ -1,6 +1,5 @@
 from baseday import BaseDay
 from dataclasses import dataclass
-from itertools import batched
 from typing import Iterator, Self
 
 @dataclass
@@ -64,3 +63,9 @@ class Day05(BaseDay):
             loc = min(self.almanac.map_seed(seed) for seed in range(start, start + length))
             locations.append(loc)
         print('day05 part2:', min(locations))
+
+# In python 3.12, this is itertools.batched.
+def batched(data: list[int], n: int) -> Iterator[tuple[int, ...]]:
+    while len(data) >= n:
+        yield tuple([data.pop(0) for _ in range(0, n)])
+    return

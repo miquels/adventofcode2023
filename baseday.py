@@ -7,7 +7,7 @@ def timestr(secs: float) -> str:
         return f"{secs * 1000000:.2f}us"
     if secs < 1:
         return f"{secs * 1000:.2f}ms"
-    return "{secs:.2f}s"
+    return f"{secs:.2f}s"
 
 class BaseDay():
     input: str
