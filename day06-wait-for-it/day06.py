@@ -1,6 +1,13 @@
 from baseday import BaseDay
 from dataclasses import dataclass
+from math import floor, ceil, sqrt
 from functools import reduce
+
+def quadratic(a: int, b: int, c: int) -> tuple[float, float]:
+    n = sqrt(b*b - 4*a*c)
+    s1 = (-b - n) / 2*a
+    s2 = (-b + n) / 2*a
+    return s1, s2
 
 @dataclass
 class Race:
@@ -8,11 +15,8 @@ class Race:
     distance: int
 
     def wins(self) -> int:
-        count = 0
-        for t in range(1, self.time):
-            dist = (self.time - t) * t;
-            count += dist > self.distance
-        return count
+        s1, s2 = quadratic(-1, self.time, -self.distance)
+        return ceil(max(s1, s2)) - floor(min(s1, s2)) - 1
 
 class Day06(BaseDay):
     races1: list[Race]
