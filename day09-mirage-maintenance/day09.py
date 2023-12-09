@@ -4,7 +4,7 @@ from itertools import pairwise
 
 def calc(numbers: list[int], index: int) -> list[int]:
     res = []
-    while sum(numbers) != 0:
+    while any(numbers):
         res.append(numbers[index])
         numbers = [n[1] - n[0] for n in pairwise(numbers)]
     return res
