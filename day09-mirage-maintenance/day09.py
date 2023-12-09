@@ -3,11 +3,11 @@ from functools import reduce
 from itertools import pairwise
 
 def calc(numbers: list[int], index: int) -> list[int]:
-    nums = [ numbers ]
-    while True:
-        nums.append([n[1] - n[0] for n in pairwise(nums[-1])])
-        if sum(nums[-1]) == 0:
-            return [num[index] for num in nums]
+    res = []
+    while sum(numbers) != 0:
+        res.append(numbers[index])
+        numbers = [n[1] - n[0] for n in pairwise(numbers)]
+    return res
 
 class Day09(BaseDay):
     lines: list[list[int]]
