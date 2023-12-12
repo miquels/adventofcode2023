@@ -6,41 +6,50 @@ import re
 @dataclass
 class Row:
     springs: str
-    re: re.Pattern
-    count: int
+    ops: list[int]
+    pat: re.Pattern[str] = re.compile('')
+    count: int = 0
 
     @classmethod
     def parse(cls, line: str) -> Self:
         s, o = line.split()
         ops = list(map(int, o.split(',')))
+        return cls(s, ops)
+
+    def unfold(self) -> None:
+        self.springs = "?".join([self.springs] * 5)
+        self.ops = self.ops * 5
+
+    def compile(self) -> None:
         pats = []
-        for o in ops:
+        for o in self.ops:
             pats.append(f"[?#]{{{o}}}")
         pat = r"[.?]*" + "[.?]+".join(pats) + r"[.?]*$"
-        return cls(s, re.compile(pat), 0)
+        self.pat = re.compile(pat)
 
-    def calc(self, sub: str) -> None:
-        if not re.match(self.re, sub):
+    def recurse(self, sub: str) -> None:
+        if not self.pat.match(sub):
             return
         if sub.find('?') < 0:
             self.count += 1
             return
-        self.calc(sub.replace('?', '.', 1))
-        self.calc(sub.replace('?', '#', 1))
+        self.recurse(sub.replace('?', '.', 1))
+        self.recurse(sub.replace('?', '#', 1))
     
 class Day12(BaseDay):
-    rows: list[Row]
 
-    def init(self) -> None:
-        self.rows = []
-        with open(self.input) as f:
-            self.rows = [Row.parse(line) for line in f]
+    def solve(self, unfold: bool) -> int:
+        rows = [Row.parse(line) for line in open(self.input)]
+        total = 0
+        for row in rows:
+            if unfold:
+                row.unfold()
+            row.compile()
+            row.recurse(row.springs)
+        return sum([r.count for r in rows])
 
     def part1(self) -> None:
-        total = 0
-        for row in self.rows:
-            row.calc(row.springs)
-        print("day12 part1:", sum([r.count for r in self.rows]))
+        print("day12 part1:", self.solve(False))
 
     def part2(self) -> None:
-        print("day12 part2:", 'TBD')
+        print("day12 part2:", self.solve(True))
