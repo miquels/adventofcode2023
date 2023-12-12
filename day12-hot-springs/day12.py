@@ -1,55 +1,61 @@
 from baseday import BaseDay
 from dataclasses import dataclass
-from typing import Iterator, Self
+from typing import Self
 import re
 
 @dataclass
 class Row:
     springs: str
-    ops: list[int]
-    pat: re.Pattern[str] = re.compile('')
-    count: int = 0
+    groups: list[int]
 
     @classmethod
     def parse(cls, line: str) -> Self:
         s, o = line.split()
-        ops = list(map(int, o.split(',')))
-        return cls(s, ops)
+        groups = list(map(int, o.split(',')))
+        return cls(s, groups)
 
-    def unfold(self) -> None:
-        self.springs = "?".join([self.springs] * 5)
-        self.ops = self.ops * 5
+CACHE: dict[tuple[str, tuple[int, ...]], int] = {}
 
-    def compile(self) -> None:
-        pats = []
-        for o in self.ops:
-            pats.append(f"[?#]{{{o}}}")
-        pat = r"[.?]*" + "[.?]+".join(pats) + r"[.?]*$"
-        self.pat = re.compile(pat)
+def munch(springs: str, groups: tuple[int, ...]) -> int:
+    xt = (springs, groups)
+    if xt not in CACHE:
+        CACHE[xt] = do_munch(springs, groups)
+    return CACHE[xt]
 
-    def recurse(self, sub: str) -> None:
-        if not self.pat.match(sub):
-            return
-        if sub.find('?') < 0:
-            self.count += 1
-            return
-        self.recurse(sub.replace('?', '.', 1))
-        self.recurse(sub.replace('?', '#', 1))
-    
+def do_munch(springs: str, groups: tuple[int, ...]) -> int:
+    res = 0
+    springs = springs.lstrip('.')
+    if len(groups) == 0:
+        # Trailing '.' and '?' are fine.
+        res += re.match(r"[.?]*$", springs) is not None
+        return res
+    # Match '[#?]' of length 'groups[0]' followed by '.', '?', or EOL
+    match = re.match(f"[#?]{{{groups[0]}}}(?:[?.]|$)", springs) is not None
+    if match:
+        # Skip the group that we matched and try the rest.
+        res += munch(springs[groups[0]+1:], groups[1:])
+    if springs[0:1] == '?':
+        # This '?' could be a '.', so skip over it and try to match.
+        res += munch(springs[1:], groups)
+    return res
+
 class Day12(BaseDay):
+    rows: list[Row]
 
-    def solve(self, unfold: bool) -> int:
-        rows = [Row.parse(line) for line in open(self.input)]
+    def init(self) -> None:
+        with open(self.input) as f:
+            self.rows = [Row.parse(line) for line in f]
+
+    def solve(self, unfold: int) -> int:
         total = 0
-        for row in rows:
-            if unfold:
-                row.unfold()
-            row.compile()
-            row.recurse(row.springs)
-        return sum([r.count for r in rows])
+        for i, row in enumerate(self.rows):
+            springs = "?".join([row.springs] * unfold)
+            groups = row.groups * unfold
+            total += munch(springs, tuple(groups))
+        return total
 
     def part1(self) -> None:
-        print("day12 part1:", self.solve(False))
+        print("day12 part1:", self.solve(1))
 
     def part2(self) -> None:
-        print("day12 part2:", self.solve(True))
+        print("day12 part2:", self.solve(5))
