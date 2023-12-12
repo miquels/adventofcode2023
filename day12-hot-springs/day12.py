@@ -1,29 +1,32 @@
 from baseday import BaseDay
 from dataclasses import dataclass
 from typing import Iterator, Self
+import re
 
 @dataclass
 class Row:
     springs: str
-    ops: list[int]
+    re: re.Pattern
+    count: int
 
     @classmethod
     def parse(cls, line: str) -> Self:
         s, o = line.split()
         ops = list(map(int, o.split(',')))
-        return cls(s, ops)
+        pats = []
+        for o in ops:
+            pats.append(f"[?#]{{{o}}}")
+        pat = r"[.?]*" + "[.?]+".join(pats) + r"[.?]*$"
+        return cls(s, re.compile(pat), 0)
 
-    def permutations(self) -> Iterator[str]:
-        sp = self.springs
-        qs = [x for x in range(0, len(sp)) if sp[x] == '?']
-        ba = bytearray(sp, 'ascii')
-        for n in range(0, 2 ** len(qs)):
-            for i, d in enumerate([*bin(n)[2:].zfill(len(qs))]):
-                ba[qs[i]] = ord('#') if d == '1' else ord('.')
-            yield ba.decode('ascii')
-
-    def check_row(self, row: str) -> bool:
-        return list(filter(int, (map(len, row.split('.'))))) == self.ops
+    def calc(self, sub: str) -> None:
+        if not re.match(self.re, sub):
+            return
+        if sub.find('?') < 0:
+            self.count += 1
+            return
+        self.calc(sub.replace('?', '.', 1))
+        self.calc(sub.replace('?', '#', 1))
     
 class Day12(BaseDay):
     rows: list[Row]
@@ -36,8 +39,8 @@ class Day12(BaseDay):
     def part1(self) -> None:
         total = 0
         for row in self.rows:
-            total += sum(row.check_row(r) for r in row.permutations())
-        print("day12 part1:", total)
+            row.calc(row.springs)
+        print("day12 part1:", sum([r.count for r in self.rows]))
 
     def part2(self) -> None:
         print("day12 part2:", 'TBD')
