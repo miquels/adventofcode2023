@@ -1,6 +1,5 @@
 from baseday import BaseDay
 from dataclasses import dataclass
-from typing import Self
 
 @dataclass
 class Pattern:
@@ -13,13 +12,11 @@ class Pattern:
         return 0
 
     def reflects(self, y: int) -> int:
-        diff, y1, y2 = 0, y, y + 1
-        while y1 >= 0 and y2 < len(self.grid):
-            diff += sum([self.grid[y1][x] != self.grid[y2][x] for x in range(len(self.grid[0]))])
+        diff = 0
+        for y1, y2 in zip(self.grid[y::-1], self.grid[y+1:]):
+            diff += sum([x1 != x2 for x1, x2 in zip(y1, y2)])
             if diff > 1:
                 break
-            y1 -= 1
-            y2 += 1
         return diff
 
     def transpose(self) -> 'Pattern':
