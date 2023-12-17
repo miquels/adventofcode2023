@@ -1,4 +1,5 @@
 from baseday import BaseDay
+from collections import OrderedDict
 from dataclasses import dataclass
 from functools import reduce
 
@@ -17,4 +18,19 @@ class Day15(BaseDay):
         print("day15 part1:", sum([hash(s) for s in self.initseq]))
 
     def part2(self) -> None:
-        print("day15 part2:", 'TBD')
+        boxes: list[OrderedDict] = [OrderedDict() for _ in range(256)]
+        for step in self.initseq:
+            if step.endswith('-'):
+                label, _ = step.split('-')
+                h = hash(label)
+                if label in boxes[h]:
+                    boxes[h].pop(label)
+            else:
+                label, focal = step.split('=')
+                boxes[hash(label)][label] = focal
+        total = 0
+        for boxno, box in enumerate(boxes):
+            for slot, focal in enumerate(box.values(), 1):
+                total += (boxno + 1) * slot * int(focal)
+        print("day15 part2:", total)
+
